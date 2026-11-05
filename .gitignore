@@ -1,0 +1,10 @@
+# Local environment settings. Keep the placeholder template in Git.
+.env
+.env.*
+!.env.example
+
+# Installed dependencies, build output, and browser test artifacts.
+node_modules/
+dist/
+test-results/
+playwright-report/

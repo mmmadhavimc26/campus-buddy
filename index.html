@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#29475c">
+  <meta name="description" content="VJTI campus map, building directory and directions.">
+  <title>VJTI Campus Map</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./">VJTI Campus Map</a>
+    <div class="header-right"><span id="account-label" class="account-label"></span><button class="text-button" id="admin-open" hidden>Manage locations</button><button class="text-button" id="feedback-open">Report a problem</button><button class="text-button" id="login-open">Sign in</button><button class="text-button" id="logout" hidden>Sign out</button></div>
+  </header>
+  <main>
+    <h1 class="sr-only">Campus map and directions</h1>
+    <div class="workspace">
+      <aside class="sidebar">
+        <div class="tabs" role="tablist" aria-label="Navigation mode"><button id="explore-tab" role="tab" aria-selected="true">Places</button><button id="route-tab" role="tab" aria-selected="false">Directions</button></div>
+        <section id="explore-panel"><label class="search-box"><input id="search" type="search" placeholder="Search for a place" aria-label="Search campus locations"></label><div class="filter-heading">Categories <span id="location-count"></span></div><div class="chips" id="categories" aria-label="Filter locations"></div><div class="list-heading"><h2 id="list-title">Campus directory</h2><button id="saved-toggle" class="text-button">Saved places</button></div><div id="directory" class="directory"></div><div id="recent" class="recent"></div></section>
+        <section id="route-panel" hidden><h2>Find a route</h2><p class="muted">Choose where to start and where to go.</p><form id="route-form"><label class="field">Starting point<select aria-label="Starting point" id="start" required></select></label><button type="button" class="swap" id="swap" aria-label="Swap starting point and destination">⇅</button><label class="field">Destination<select aria-label="Destination" id="destination" required></select></label><button class="primary" type="submit">Find route</button></form><div id="route-result" aria-live="polite"></div></section>
+
+      </aside>
+      <section class="map-panel" aria-label="Interactive VJTI campus map">
+        <div class="map-toolbar"><strong class="map-heading">Campus map</strong><span class="map-tag">Not to scale</span></div>
+        <div class="map-viewport" id="map-viewport"><svg id="campus-map" viewBox="0 0 1000 760" role="group" aria-label="Interactive VJTI campus layout. Select a numbered building for details."></svg></div>
+        <div class="map-controls"><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out">−</button><button id="zoom-reset" aria-label="Reset map view">⌖</button></div>
+        <div class="map-bottom"><div class="legend"><span><i class="legend-building"></i> Building</span><span><i class="legend-path"></i> Path</span><span><i class="legend-route"></i> Route</span></div></div>
+
+        <article id="building-card" class="building-card" hidden></article>
+      </section>
+    </div>
+    <footer><span>Path access and distances need verification.</span><button class="text-button" id="about-open">About this map</button></footer>
+  </main>
+  <dialog id="feedback-dialog"><form id="feedback-form"><div class="dialog-heading"><h2>Report a problem</h2><button type="button" id="feedback-close" class="icon-button" aria-label="Close feedback">×</button></div><p id="feedback-mode" class="muted"></p><label class="field">Place<select aria-label="Place" id="feedback-location"></select></label><label class="field">Details<textarea id="feedback-message" required minlength="10" maxlength="2000" rows="5" placeholder="What is incorrect?"></textarea></label><button class="primary" id="feedback-submit">Submit</button><p id="feedback-result" role="status"></p></form></dialog>
+  <dialog id="about-dialog" aria-labelledby="about-title"><div class="dialog-heading"><h2 id="about-title">About this map</h2><button type="button" id="about-close" class="icon-button" aria-label="Close about">×</button></div><p>This is a student campus navigation project, not an official VJTI service.</p><p>The layout uses the campus signboard photographed in 2012. Buildings and paths may have changed. Paths are inferred and distances have not been measured.</p><h3>Map credit</h3><p>Map of VJTI.JPG by <a href="https://commons.wikimedia.org/wiki/File:Map_of_VJTI.JPG" target="_blank" rel="noopener">Ankitdaf</a>, 13 April 2012. Source image and this modified vector layout: <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA 3.0</a>. Changes include simplified outlines, changed proportions, labels and connecting paths.</p><p><a href="assets/vjti-campus-signboard.jpg" target="_blank" rel="noopener">Original photograph</a></p><p id="data-status" class="muted">Using local map data.</p></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <dialog id="login-dialog" aria-labelledby="login-title"><form id="login-form"><div class="dialog-heading"><h2 id="login-title">Sign in</h2><button type="button" id="login-close" class="icon-button" aria-label="Close sign in">×</button></div><p class="muted" id="login-note">Sign in with your campus account.</p><label class="field">Email<input id="login-email" type="email" autocomplete="username" required maxlength="254"></label><label class="field">Password<input id="login-password" type="password" autocomplete="current-password" required maxlength="200"></label><button class="primary" id="login-submit" type="submit">Sign in</button><p id="login-result" role="status" class="form-message"></p><div id="demo-logins" hidden><p class="muted">Demo mode. These accounts use browser data only.</p><button class="demo-account" type="button" id="demo-student">Fill student login</button><button class="demo-account" type="button" id="demo-admin">Fill admin login</button><p class="demo-credentials">Student: student@demo.local / Student123!<br>Admin: admin@demo.local / Admin123!</p></div></form></dialog>
+  <dialog id="admin-dialog" class="admin-dialog" aria-labelledby="admin-title"><div class="dialog-heading"><h2 id="admin-title">Manage locations</h2><button type="button" id="admin-close" class="icon-button" aria-label="Close location management">×</button></div><p id="admin-mode" class="muted"></p><label class="field">Location<select aria-label="Location" id="admin-location"></select></label><form id="admin-form"><div class="admin-grid"><label class="field">Name<input id="edit-name" required maxlength="120"></label><label class="field">Category<input id="edit-category" required maxlength="60" list="category-options"><datalist id="category-options"></datalist></label><label class="field">Floor<input id="edit-floor" maxlength="100"></label><label class="field">Room / office<input id="edit-room" maxlength="100"></label></div><label class="field">Opening hours<input id="edit-opening_hours" maxlength="200" placeholder="e.g. Mon–Fri, 9 am–5 pm"></label><label class="field">Description<textarea id="edit-description" rows="3" maxlength="2000"></textarea></label><div class="admin-grid"><label class="field">Facilities (one per line)<textarea id="edit-facilities" rows="3"></textarea></label><label class="field">Other search names (one per line)<textarea id="edit-aliases" rows="3"></textarea></label></div><button class="primary" id="admin-save" type="submit">Save changes</button><p id="admin-result" class="form-message" role="status"></p></form></dialog>
+  <script src="config.js"></script><script type="module" src="src/app.js"></script>
+</body></html>
